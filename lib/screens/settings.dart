@@ -13,7 +13,7 @@ class SettingsFormState extends State<SettingsForm> {
   @override
   Widget build(BuildContext context) {
     Person person = Provider.of<Person>(context);
-    return Scaffold(
+    return const Scaffold(
         body: Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,

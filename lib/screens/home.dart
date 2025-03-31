@@ -57,7 +57,7 @@ class _HomeState extends State<Home> {
     return Scaffold(
         appBar: AppBar(
           backgroundColor: headerColor,
-          title: Text('LFA Calendar'),
+          title: const Text('LFA Calendar'),
           actions: <Widget>[
             ElevatedButton.icon(
               style: buttonStyle,

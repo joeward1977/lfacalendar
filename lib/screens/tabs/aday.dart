@@ -45,22 +45,21 @@ class ADayState extends State<ADayTable> {
       showBottomBorder: true,
       headingTextStyle: const TextStyle(
           fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
-      headingRowColor:
-          MaterialStateProperty.resolveWith((states) => headerColor),
+      headingRowColor: WidgetStateProperty.resolveWith((states) => headerColor),
     );
   }
 
   // This method gets the column headings and makes columns sortable
   List<DataColumn> _createColumns() {
     return [
-      DataColumn(
-        label: const Text('Class Name'),
+      const DataColumn(
+        label: Text('Class Name'),
       ),
-      DataColumn(
-        label: const Text('Room Name'),
+      const DataColumn(
+        label: Text('Room Name'),
       ),
-      DataColumn(
-        label: const Text('Double?'),
+      const DataColumn(
+        label: Text('Double?'),
       ),
     ];
   }
@@ -111,7 +110,7 @@ class ADayState extends State<ADayTable> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        constraints: BoxConstraints(maxWidth: 600),
+        constraints: const BoxConstraints(maxWidth: 600),
         // The body of the GUI cotains the DataTable in a ListView Widget
         child: ListView(
           children: [FittedBox(child: _createDataTable())],

@@ -37,7 +37,7 @@ class FullScheduleTableState extends State<FullScheduleTable> {
         padding: const EdgeInsets.all(15.0),
         child: Container(
           child: Table(
-            border: TableBorder.all(color: Color(0xff000000), width: 5),
+            border: TableBorder.all(color: const Color(0xff000000), width: 5),
             defaultVerticalAlignment: TableCellVerticalAlignment.middle,
             children: [
               for (int i = 0; i < 8; i++)
