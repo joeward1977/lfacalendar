@@ -33,7 +33,7 @@ class ADayState extends State<ADayTable> {
 
   /// Save any changes to Firestore and update the local schedule state
   void save() {
-    person.updatePeriods();
+    person.updatePeriodsADay();
     person.sendScheduleData();
 
     // Print all period IDs and warn if duplicates are found
@@ -92,10 +92,10 @@ class ADayState extends State<ADayTable> {
 
     // Ensure valid data structure exists
     if (person.schedule.periods.length < 54) {
-      debugPrint("New User – initializing full period list.");
+      debugPrint("New User - initializing full period list.");
       person.schedule.addAllPeriod();
     } else {
-      debugPrint("Returning User – period list found.");
+      debugPrint("Returning User - period list found.");
     }
 
     // Only display first 8 periods for this view

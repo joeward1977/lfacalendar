@@ -34,7 +34,7 @@ class Person {
   List<int> doubles = [31, 39, 23, 43, 35, -1, 25, 15];
 
   // Updates the periods based on the band configuration
-  void updatePeriods() {
+  void updatePeriodsADay() {
     for (int i = 0; i < bands.length; i++) {
       for (int j = 0; j < bands[0].length; j++) {
         if (schedule.periods[i].fullCourse) {
@@ -67,18 +67,23 @@ class Person {
     }
 
     // Populate yearPeriods with actual data from the CSV
+    // Loop through the rows on the csv file
     for (int rows = 0; rows < periodNumbers.length; rows++) {
       if (['Advisory', 'Morning Meeting', 'Break', 'All School Meeting']
           .contains(periodNumbers[rows])) {
         continue; // Skip these special period types
       }
+      // Loop through the A-G letter days
       for (int letterDayIndex = 0;
           letterDayIndex < letterDays.length;
           letterDayIndex++) {
+        // Loop through the period 1 to 8
         for (int period = 1; period <= 8; period++) {
+          // Check if the row is the correct letter day and period
           if (periodNumbers[rows] ==
               letterDays[letterDayIndex] + period.toString()) {
             int periodIndex = letterDayIndex * 8 + (period - 1);
+            // Make sure we are in the first 54 periods
             if (periodIndex < yearPeriods.length) {
               String periodHeading =
                   letterDays[letterDayIndex] + period.toString();
@@ -132,7 +137,7 @@ class Person {
     if (periodNum == 5) return; // Skip if the period is 5
     schedule.periods[doubles[periodNum]] =
         wasChecked ? schedule.periods[periodNum] : schedule.periods[55];
-    updatePeriods(); // Update the periods after modification
+    updatePeriodsADay(); // Update the periods after modification
   }
 
   // Initializes the schedule with new Period objects
@@ -152,14 +157,13 @@ class Person {
         )
         .doc(uid);
     await docRef.set(schedule);
-    //fillYearPeriods(); // Fill year periods after sending data
   }
 
   // Loads the schedule data from Firestore
   Future loadScheduleData() async {
     print("Loading schedule data...");
     schedule.addAllPeriod(); // Ensure all periods are added
-    updatePeriods(); // Update periods to reflect any changes
+    updatePeriodsADay(); // Update periods to reflect any changes
     final docRef = firestoreDB.collection("users").doc(uid).withConverter(
           fromFirestore: Schedule.fromFirestore,
           toFirestore: (Schedule schedule, _) => schedule.toMap(),
