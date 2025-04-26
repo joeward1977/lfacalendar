@@ -201,7 +201,7 @@
     },
     {
       "name": "file_picker",
-      "rootUri": "file:///Users/jward/.pub-cache/hosted/pub.dev/file_picker-10.0.0",
+      "rootUri": "file:///Users/jward/.pub-cache/hosted/pub.dev/file_picker-10.1.2",
       "packageUri": "lib/",
       "languageVersion": "3.4"
     },
@@ -321,7 +321,7 @@
     },
     {
       "name": "html",
-      "rootUri": "file:///Users/jward/.pub-cache/hosted/pub.dev/html-0.15.5",
+      "rootUri": "file:///Users/jward/.pub-cache/hosted/pub.dev/html-0.15.5+1",
       "packageUri": "lib/",
       "languageVersion": "3.2"
     },
@@ -351,9 +351,9 @@
     },
     {
       "name": "js",
-      "rootUri": "file:///Users/jward/.pub-cache/hosted/pub.dev/js-0.6.7",
+      "rootUri": "file:///Users/jward/.pub-cache/hosted/pub.dev/js-0.7.2",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.7"
     },
     {
       "name": "json_annotation",
@@ -722,7 +722,7 @@
       "languageVersion": "3.0"
     }
   ],
-  "generated": "2025-03-31T19:16:13.217075Z",
+  "generated": "2025-04-14T03:54:49.591724Z",
   "generator": "pub",
   "generatorVersion": "3.8.0-171.0.dev",
   "flutterRoot": "file:///Users/jward/Developer/flutter",

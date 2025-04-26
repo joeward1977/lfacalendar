@@ -90,7 +90,7 @@ class RegisterLoginState extends State<RegisterLogin> {
                         style: buttonStyle,
                         child: Text(
                           buttonText[type],
-                          style: const TextStyle(color: Colors.white),
+                          style: const TextStyle(color: Colors.black),
                         ),
                         onPressed: () async {
                           if (_formKey.currentState!.validate()) {

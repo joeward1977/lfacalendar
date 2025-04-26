@@ -5,6 +5,7 @@ class Period {
   String id;
   String className;
   String roomName;
+  bool fullCourse;
   List<String> date;
   List<String> startTime;
   List<String> endTime;
@@ -14,6 +15,7 @@ class Period {
             id: id,
             className: "",
             roomName: "",
+            fullCourse: false,
             date: [],
             startTime: [],
             endTime: []);
@@ -22,6 +24,7 @@ class Period {
       {required this.id,
       required this.className,
       required this.roomName,
+      required this.fullCourse,
       required this.date,
       required this.startTime,
       required this.endTime});
@@ -42,6 +45,7 @@ class Period {
       id: theMap['id'].toString(),
       className: theMap['className'],
       roomName: theMap['roomName'],
+      fullCourse: theMap['fullCourse'],
       date: [],
       startTime: [],
       endTime: [],
@@ -53,6 +57,7 @@ class Period {
       "id": id,
       "className": className,
       "roomName": roomName,
+      "fullCourse": fullCourse,
     };
   }
 }

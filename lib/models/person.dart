@@ -19,6 +19,7 @@ class Person {
   bool wantsPeriodHeadings = false;
 
   Person({required this.uid});
+
   List<List<int>> bands = [
     [0, 9, 16, 30, 46, 49],
     [1, 8, 18, 38, 47, 52],
@@ -32,14 +33,18 @@ class Person {
 
   List<int> doubles = [31, 39, 23, 43, 35, -1, 25, 15];
 
+  // Updates the periods based on the band configuration
   void updatePeriods() {
     for (int i = 0; i < bands.length; i++) {
       for (int j = 0; j < bands[0].length; j++) {
-        schedule.periods[bands[i][j]] = schedule.periods[i];
+        if (schedule.periods[i].fullCourse) {
+          schedule.periods[bands[i][j]] = schedule.periods[i];
+        }
       }
     }
   }
 
+  // Fills the yearPeriods list with data from the CSV files
   void fillYearPeriods() async {
     yearPeriods.clear();
     List<String> periodNumbers = await readClassColumn(0);
@@ -47,23 +52,25 @@ class Person {
     List<String> startTimes = await readClassColumn(2);
     List<String> endTimes = await readClassColumn(4);
     List<String> letterDays = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+
+    // Initialize yearPeriods with empty Period objects
     for (int i = 0; i < 56; i++) {
       yearPeriods.add(Period.withData(
         id: schedule.periods[i].id,
         className: schedule.periods[i].className,
         roomName: schedule.periods[i].roomName,
+        fullCourse: schedule.periods[i].fullCourse,
         date: [],
         startTime: [],
         endTime: [],
       ));
     }
 
+    // Populate yearPeriods with actual data from the CSV
     for (int rows = 0; rows < periodNumbers.length; rows++) {
-      if (periodNumbers[rows] == 'Advisory' ||
-          periodNumbers[rows] == 'Morning Meeting' ||
-          periodNumbers[rows] == 'Break' ||
-          periodNumbers[rows] == 'All School Meeting') {
-        continue;
+      if (['Advisory', 'Morning Meeting', 'Break', 'All School Meeting']
+          .contains(periodNumbers[rows])) {
+        continue; // Skip these special period types
       }
       for (int letterDayIndex = 0;
           letterDayIndex < letterDays.length;
@@ -75,13 +82,11 @@ class Person {
             if (periodIndex < yearPeriods.length) {
               String periodHeading =
                   letterDays[letterDayIndex] + period.toString();
-              if (wantsPeriodHeadings == true) {
-                if (schedule.periods[periodIndex].className == '') {
-                  yearPeriods[periodIndex].className = periodHeading;
-                } else {
-                  yearPeriods[periodIndex].className =
-                      '$periodHeading - ${schedule.periods[periodIndex].className}';
-                }
+              if (wantsPeriodHeadings) {
+                yearPeriods[periodIndex].className = schedule
+                        .periods[periodIndex].className.isEmpty
+                    ? periodHeading
+                    : '$periodHeading - ${schedule.periods[periodIndex].className}';
               }
               yearPeriods[periodIndex].date.add(dates[rows]);
               yearPeriods[periodIndex].startTime.add(startTimes[rows]);
@@ -91,58 +96,53 @@ class Person {
         }
       }
     }
-    if (wantsAdvisory == true) {
-      await addPeriodType('Advisory', 'assets/adv.csv');
-    }
-    if (wantsMM == true) {
-      await addPeriodType('Morning Meeting', 'assets/mm.csv');
-    }
-    if (wantsBreaks == true) {
-      await addPeriodType('Break', 'assets/breaks.csv');
-    }
-    if (wantsASM == true) {
-      await addPeriodType('All School Meeting', 'assets/asm.csv');
-    }
+
+    // Add additional period types based on user preferences
+    if (wantsAdvisory) await addPeriodType('Advisory', 'assets/adv.csv');
+    if (wantsMM) await addPeriodType('Morning Meeting', 'assets/mm.csv');
+    if (wantsBreaks) await addPeriodType('Break', 'assets/breaks.csv');
+    if (wantsASM) await addPeriodType('All School Meeting', 'assets/asm.csv');
+
+    // Export the filled year periods to a CSV file
     exportPeriodsToCSV(yearPeriods);
   }
 
+  // Adds a new type of period from a CSV file
   Future<void> addPeriodType(String className, String file) async {
     List<String> dates = await loadColumnFromCSV(file, 1);
     List<String> startTimes = await loadColumnFromCSV(file, 2);
     List<String> endTimes = await loadColumnFromCSV(file, 4);
-    dates.removeAt(0);
-    startTimes.removeAt(0);
-    endTimes.removeAt(0);
+    dates.removeAt(0); // Remove header
+    startTimes.removeAt(0); // Remove header
+    endTimes.removeAt(0); // Remove header
 
     yearPeriods.add(Period.withData(
       id: uuid.v4(),
       className: className,
       roomName: '',
+      fullCourse: false,
       date: dates,
       startTime: startTimes,
       endTime: endTimes,
     ));
   }
 
+  // Updates the schedule for double periods based on user input
   void updateDoubles(bool wasChecked, int periodNum) {
-    if (periodNum == 5) {
-      return;
-    }
-    if (wasChecked) {
-      schedule.periods[doubles[periodNum]] = schedule.periods[periodNum];
-      updatePeriods();
-    } else {
-      schedule.periods[doubles[periodNum]] = schedule.periods[55];
-      updatePeriods();
-    }
+    if (periodNum == 5) return; // Skip if the period is 5
+    schedule.periods[doubles[periodNum]] =
+        wasChecked ? schedule.periods[periodNum] : schedule.periods[55];
+    updatePeriods(); // Update the periods after modification
   }
 
+  // Initializes the schedule with new Period objects
   void newSchedule(id) {
     for (int i = 0; i < 56; i++) {
       schedule.periods[i] = Period(id);
     }
   }
 
+  // Sends the current schedule data to Firestore
   void sendScheduleData() async {
     final docRef = firestoreDB
         .collection("users")
@@ -152,49 +152,46 @@ class Person {
         )
         .doc(uid);
     await docRef.set(schedule);
-    fillYearPeriods();
+    //fillYearPeriods(); // Fill year periods after sending data
   }
 
+  // Loads the schedule data from Firestore
   Future loadScheduleData() async {
-    print("here");
-    schedule.addAllPeriod();
-    print(schedule.periods[0].className);
-    updatePeriods();
-    print(schedule.periods[0].className);
+    print("Loading schedule data...");
+    schedule.addAllPeriod(); // Ensure all periods are added
+    updatePeriods(); // Update periods to reflect any changes
     final docRef = firestoreDB.collection("users").doc(uid).withConverter(
           fromFirestore: Schedule.fromFirestore,
           toFirestore: (Schedule schedule, _) => schedule.toMap(),
         );
     final docSnap = await docRef.get();
-    schedule = docSnap.data()!;
+    schedule = docSnap.data()!; // Update the schedule with data from Firestore
   }
 
+  // Loads a specific column from a CSV file
   Future<List<String>> loadColumnFromCSV(
       String fileName, int columnIndex) async {
-    // Load CSV file from assets
     final csvData = await rootBundle.loadString(fileName);
-
-    // Convert CSV data to a List of List of strings
     List<List<dynamic>> rows = const CsvToListConverter().convert(csvData);
-
-    // Extract the specific column
     List<String> columnData = [];
     for (var row in rows) {
       if (row.length > columnIndex) {
         columnData.add(row[columnIndex].toString());
       }
     }
-    return columnData;
+    return columnData; // Return the extracted column data
   }
 
+  // Reads a specific class column from the classes CSV file
   Future<List<String>> readClassColumn(int c) async {
-    List<String> columnData = await loadColumnFromCSV('assets/classes.csv', c);
-    return columnData;
+    return await loadColumnFromCSV('assets/classes.csv', c);
   }
 
+  // Exports the yearPeriods data to a CSV file
   void exportPeriodsToCSV(List<Period> yearPeriods) {
     List<List<String>> rows = [];
 
+    // Add header row
     rows.add([
       'Subject',
       'Start Date',
@@ -207,6 +204,7 @@ class Person {
       ''
     ]);
 
+    // Add each period's data to the rows
     for (var period in yearPeriods) {
       for (int i = 0; i < period.date.length; i++) {
         if (!(wantsFreePeriods && period.className.length <= 2)) {
@@ -225,27 +223,21 @@ class Person {
       }
     }
 
-    // Convert rows to CSV
+    // Convert rows to CSV format
     String csvData = const ListToCsvConverter().convert(rows);
-
-    // Encode the CSV data in UTF-8
-    final bytes = utf8.encode(csvData);
-
-    // Create a downloadable Blob from the CSV data
-    final blob = html.Blob([bytes]);
-
-    // Create a URL for the Blob
-    final url = html.Url.createObjectUrlFromBlob(blob);
+    final bytes = utf8.encode(csvData); // Encode CSV data in UTF-8
+    final blob =
+        html.Blob([bytes]); // Create a downloadable Blob from the CSV data
+    final url =
+        html.Url.createObjectUrlFromBlob(blob); // Create a URL for the Blob
 
     // Create a hidden anchor element to trigger the download
     final anchor = html.AnchorElement(href: url)
       ..target = 'blank'
       ..download = 'PeriodsSchedule.csv';
 
-    // Append the anchor to the document body
+    // Append the anchor to the document body and trigger the download
     html.document.body?.append(anchor);
-
-    // Trigger the download by calling click() on the anchor
     anchor.click();
 
     // Clean up by revoking the URL and removing the anchor

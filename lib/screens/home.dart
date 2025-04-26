@@ -37,20 +37,6 @@ class _HomeState extends State<Home> {
   /// The build method is what creates the GUI for the program
   @override
   Widget build(BuildContext context) {
-    /// This method puts a widget we created for getting settings on the
-    /// bottom panel of the app when the setttings button is pressed
-    void showSettingsPanel() {
-      showModalBottomSheet(
-          context: context,
-          builder: (context) {
-            return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 150.0),
-                child: const SettingsForm());
-          }).whenComplete(() {
-        setState(() {}); // This refreshes the data when settings panel is done
-      });
-    }
-
     /// This is the main GUI layout
     /// The first part is the appBar which is at the top of the screen and
     /// hold the title and the Logout action button
@@ -66,14 +52,6 @@ class _HomeState extends State<Home> {
               onPressed: () async {
                 save();
                 await _auth.signOut();
-              },
-            ),
-            ElevatedButton.icon(
-              style: buttonStyle,
-              icon: const Icon(Icons.settings),
-              label: const Text(''),
-              onPressed: () async {
-                showSettingsPanel();
               },
             ),
           ],

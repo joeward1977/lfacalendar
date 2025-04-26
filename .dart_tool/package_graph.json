@@ -137,7 +137,7 @@
     },
     {
       "name": "file_picker",
-      "version": "10.0.0",
+      "version": "10.1.2",
       "dependencies": [
         "cross_file",
         "ffi",
@@ -393,10 +393,8 @@
     },
     {
       "name": "js",
-      "version": "0.6.7",
-      "dependencies": [
-        "meta"
-      ]
+      "version": "0.7.2",
+      "dependencies": []
     },
     {
       "name": "io",
@@ -607,6 +605,11 @@
       ]
     },
     {
+      "name": "lints",
+      "version": "5.1.1",
+      "dependencies": []
+    },
+    {
       "name": "vm_service",
       "version": "15.0.0",
       "dependencies": []
@@ -812,7 +815,7 @@
     },
     {
       "name": "html",
-      "version": "0.15.5",
+      "version": "0.15.5+1",
       "dependencies": [
         "csslib",
         "source_span"
@@ -831,6 +834,14 @@
       ]
     },
     {
+      "name": "cross_file",
+      "version": "0.3.4+2",
+      "dependencies": [
+        "meta",
+        "web"
+      ]
+    },
+    {
       "name": "win32",
       "version": "5.12.0",
       "dependencies": [
@@ -838,10 +849,22 @@
       ]
     },
     {
+      "name": "ffi",
+      "version": "2.1.4",
+      "dependencies": []
+    },
+    {
       "name": "plugin_platform_interface",
       "version": "2.1.8",
       "dependencies": [
         "meta"
+      ]
+    },
+    {
+      "name": "flutter_plugin_android_lifecycle",
+      "version": "2.0.27",
+      "dependencies": [
+        "flutter"
       ]
     },
     {
@@ -854,26 +877,6 @@
         "material_color_utilities",
         "meta",
         "vector_math"
-      ]
-    },
-    {
-      "name": "flutter_plugin_android_lifecycle",
-      "version": "2.0.27",
-      "dependencies": [
-        "flutter"
-      ]
-    },
-    {
-      "name": "ffi",
-      "version": "2.1.4",
-      "dependencies": []
-    },
-    {
-      "name": "cross_file",
-      "version": "0.3.4+2",
-      "dependencies": [
-        "meta",
-        "web"
       ]
     },
     {
@@ -957,13 +960,18 @@
       ]
     },
     {
-      "name": "sprintf",
-      "version": "7.0.0",
+      "name": "logger",
+      "version": "2.5.0",
       "dependencies": []
     },
     {
       "name": "fixnum",
       "version": "1.1.1",
+      "dependencies": []
+    },
+    {
+      "name": "sprintf",
+      "version": "7.0.0",
       "dependencies": []
     },
     {
@@ -1133,16 +1141,6 @@
         "flutter",
         "meta"
       ]
-    },
-    {
-      "name": "lints",
-      "version": "5.1.1",
-      "dependencies": []
-    },
-    {
-      "name": "logger",
-      "version": "2.5.0",
-      "dependencies": []
     }
   ],
   "configVersion": 1

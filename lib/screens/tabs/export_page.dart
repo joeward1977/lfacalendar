@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutterdatabase/models/person.dart';
 
+/// This page provides options for exporting a user's schedule
+/// in CSV format with various configurable filters.
 class ExportPage extends StatefulWidget {
   final Person person;
 
@@ -15,9 +17,13 @@ class ExportPageState extends State<ExportPage> {
 
   @override
   void initState() {
-    person = widget.person;
-    person.loadScheduleData().then((result) => {setState(() {})});
     super.initState();
+    person = widget.person;
+
+    // Load the user's existing schedule data
+    person.loadScheduleData().then((_) {
+      setState(() {});
+    });
   }
 
   @override
@@ -29,66 +35,102 @@ class ExportPageState extends State<ExportPage> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          ElevatedButton(
-            child: const Text("Download File"),
-            onPressed: () {
-              person.fillYearPeriods();
-            },
-          ),
-          Row(children: [
-            const Text("Exclude Free Periods?: "),
-            Checkbox(
+          // Checkbox to exclude free periods from export
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text("Exclude Free Periods?: "),
+              Checkbox(
                 value: person.wantsFreePeriods,
                 onChanged: (val) {
                   person.wantsFreePeriods = !person.wantsFreePeriods;
                   setState(() {});
-                })
-          ]),
-          Row(children: [
-            const Text("Include Period Headings? "),
-            Checkbox(
+                },
+              )
+            ],
+          ),
+
+          // Checkbox to include period headings in export
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text("Include Period Headings? "),
+              Checkbox(
                 value: person.wantsPeriodHeadings,
                 onChanged: (val) {
                   person.wantsPeriodHeadings = !person.wantsPeriodHeadings;
                   setState(() {});
-                })
-          ]),
-          Row(children: [
-            const Text("Include Advisory: "),
-            Checkbox(
+                },
+              )
+            ],
+          ),
+
+          // Checkbox to include advisory periods
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text("Include Advisory: "),
+              Checkbox(
                 value: person.wantsAdvisory,
                 onChanged: (val) {
                   person.wantsAdvisory = !person.wantsAdvisory;
                   setState(() {});
-                })
-          ]),
-          Row(children: [
-            const Text("Include ASM: "),
-            Checkbox(
+                },
+              )
+            ],
+          ),
+
+          // Checkbox to include ASM periods
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text("Include ASM: "),
+              Checkbox(
                 value: person.wantsASM,
                 onChanged: (val) {
                   person.wantsASM = !person.wantsASM;
                   setState(() {});
-                })
-          ]),
-          Row(children: [
-            const Text("Include Breaks: "),
-            Checkbox(
+                },
+              )
+            ],
+          ),
+
+          // Checkbox to include break periods
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text("Include Breaks: "),
+              Checkbox(
                 value: person.wantsBreaks,
                 onChanged: (val) {
                   person.wantsBreaks = !person.wantsBreaks;
                   setState(() {});
-                })
-          ]),
-          Row(children: [
-            const Text("Include MM: "),
-            Checkbox(
+                },
+              )
+            ],
+          ),
+
+          // Checkbox to include Morning Meeting periods
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text("Include MM: "),
+              Checkbox(
                 value: person.wantsMM,
                 onChanged: (val) {
                   person.wantsMM = !person.wantsMM;
                   setState(() {});
-                })
-          ]),
+                },
+              )
+            ],
+          ),
+          // Button to initiate CSV generation
+          ElevatedButton(
+            child: const Text("Download File"),
+            onPressed: () {
+              person.fillYearPeriods(); // Fills in yearly schedule data
+            },
+          ),
         ],
       ),
     );

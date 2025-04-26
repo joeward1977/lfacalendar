@@ -4,6 +4,7 @@ import 'package:flutterdatabase/models/person.dart';
 import 'package:flutterdatabase/models/period.dart';
 import 'package:uuid/uuid.dart';
 
+/// ADayTable displays a schedule table for a given [Person]
 class ADayTable extends StatefulWidget {
   final Person person;
 
@@ -15,105 +16,189 @@ class ADayTable extends StatefulWidget {
 
 class ADayState extends State<ADayTable> {
   late Person person;
-  // Variables for helping with the data table of players
-  List<String> selectedPeriods = [];
-  var uuid = const Uuid();
+  final List<String> selectedPeriods = [];
+  final uuid = const Uuid();
 
   @override
   void initState() {
-    person = widget.person;
-    person.loadScheduleData().then((result) => {setState(() {})});
-    person.schedule.addAllPeriod();
     super.initState();
+    person = widget.person;
+
+    // Load saved schedule data asynchronously
+    person.loadScheduleData().then((_) => setState(() {}));
+
+    // Ensure the person has all expected periods initialized
+    person.schedule.addAllPeriod();
   }
 
-  // Method to save data to Google Firestore
+  /// Save any changes to Firestore and update the local schedule state
   void save() {
-    person.sendScheduleData();
     person.updatePeriods();
+    person.sendScheduleData();
+
+    // Print all period IDs and warn if duplicates are found
+    final periodIds =
+        person.schedule.periods.map((period) => period.id).toList();
+    final duplicates = periodIds
+        .toSet()
+        .where((id) => periodIds.where((x) => x == id).length > 1);
+    if (duplicates.isNotEmpty) {
+      debugPrint(
+          'Warning: Duplicate period IDs found: ${duplicates.join(', ')}');
+    }
+
     setState(() {});
   }
 
-  /// The following methods create the data table
-  /// This method puts it all together and styles the table
-  DataTable _createDataTable() {
-    return DataTable(
-      columns: _createColumns(),
-      rows: _createRows(),
-      dividerThickness: 3,
-      dataRowHeight: 35,
-      showBottomBorder: true,
-      headingTextStyle: const TextStyle(
-          fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
-      headingRowColor: WidgetStateProperty.resolveWith((states) => headerColor),
+  /// Builds the DataTable widget with styles and data
+  SingleChildScrollView _createDataTable(BuildContext context) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: ConstrainedBox(
+        constraints:
+            BoxConstraints(minWidth: MediaQuery.of(context).size.width),
+        child: DataTable(
+          columns: _createColumns(),
+          rows: _createRows(),
+          dividerThickness: 3,
+          dataRowMinHeight: 35,
+          dataRowMaxHeight: 35,
+          showBottomBorder: true,
+          headingTextStyle: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+          headingRowColor: WidgetStateProperty.resolveWith(
+            (states) => headerColor,
+          ),
+        ),
+      ),
     );
   }
 
-  // This method gets the column headings and makes columns sortable
+  /// Returns the column headers for the schedule table
   List<DataColumn> _createColumns() {
-    return [
-      const DataColumn(
-        label: Text('Class Name'),
-      ),
-      const DataColumn(
-        label: Text('Room Name'),
-      ),
-      const DataColumn(
-        label: Text('Double?'),
-      ),
+    return const [
+      DataColumn(label: Text('Class Name')),
+      DataColumn(label: Text('Room Name')),
+      DataColumn(label: Text('Double?')),
     ];
   }
 
-  // This method put the data into each rom
+  /// Builds each row of the table using the person's schedule
   List<DataRow> _createRows() {
     List<DataRow> data = [];
+
+    // Ensure valid data structure exists
     if (person.schedule.periods.length < 54) {
-      print("New User");
+      debugPrint("New User – initializing full period list.");
       person.schedule.addAllPeriod();
     } else {
-      print("Old User");
+      debugPrint("Returning User – period list found.");
     }
+
+    // Only display first 8 periods for this view
     for (int x = 0; x < 8; x++) {
       Period period = person.schedule.periods[x];
+      debugPrint(period.id);
+      var name = period.className;
+      var room = period.roomName;
+      bool full = period.fullCourse;
+      if (!full) {
+        name = "";
+        room = "";
+      }
+
       data.add(DataRow(cells: [
-        DataCell(TextFormField(
-            controller: TextEditingController(text: period.className),
-            keyboardType: TextInputType.name,
-            onChanged: (val) =>
-                person.schedule.getPeriod(period.id)!.className = val,
-            onFieldSubmitted: (val) {
-              person.updateDoubles(person.dubs[x], x);
-              save();
-            })),
-        DataCell(TextFormField(
-            controller: TextEditingController(text: period.roomName),
-            keyboardType: TextInputType.name,
-            onChanged: (val) =>
-                person.schedule.getPeriod(period.id)!.roomName = val,
-            onFieldSubmitted: (val) {
-              person.updateDoubles(person.dubs[x], x);
-              save();
-            })),
-        DataCell(Checkbox(
+        DataCell(Row(children: [
+          Expanded(
+            child: TextFormField(
+              initialValue: name,
+              keyboardType: TextInputType.name,
+              onChanged: (val) {
+                debugPrint(period.id);
+                period.className = val;
+                period.fullCourse = true;
+              },
+              onFieldSubmitted: (_) {
+                person.updateDoubles(person.dubs[x], x);
+              },
+            ),
+          ),
+        ])),
+        DataCell(Row(children: [
+          Expanded(
+            child: TextFormField(
+              initialValue: room,
+              keyboardType: TextInputType.name,
+              onChanged: (val) {
+                debugPrint(period.id);
+                period.roomName = val;
+                period.fullCourse = true;
+              },
+              onFieldSubmitted: (_) {
+                person.updateDoubles(person.dubs[x], x);
+              },
+            ),
+          ),
+        ])),
+        DataCell(Center(
+          child: Checkbox(
             value: person.dubs[x],
             onChanged: (val) {
-              person.dubs[x] = !person.dubs[x];
-              person.updateDoubles(person.dubs[x], x);
-              save();
-            }))
+              setState(() {
+                person.dubs[x] = val ?? false;
+                person.updateDoubles(person.dubs[x], x);
+              });
+            },
+          ),
+        )),
       ]));
     }
+
     return data;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        constraints: const BoxConstraints(maxWidth: 600),
-        // The body of the GUI cotains the DataTable in a ListView Widget
-        child: ListView(
-          children: [FittedBox(child: _createDataTable())],
+      body: SizedBox.expand(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'A-Day Classes',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: save,
+                    child: const Text('Save'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  '(course which meet for the whole cycle)',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Expanded(child: _createDataTable(context)),
+            ],
+          ),
         ),
       ),
     );
