@@ -33,7 +33,6 @@ class AuthService {
       User? user = result.user;
       Person customUser = Person(uid: user!.uid);
       customUser.newSchedule(user.uid);
-      print('Test 2');
       customUser.sendScheduleData();
     } catch (error) {
       return null;
