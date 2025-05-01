@@ -18,17 +18,20 @@ class ADayState extends State<ADayTable> {
   late Person person;
   final List<String> selectedPeriods = [];
   final uuid = const Uuid();
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
     person = widget.person;
 
-    // Load saved schedule data asynchronously
-    person.loadScheduleData().then((_) => setState(() {}));
-
-    // Ensure the person has all expected periods initialized
-    person.schedule.addAllPeriod();
+    // Load saved schedule data asynchronously, then initialize periods and update UI
+    person.loadScheduleData().then((_) {
+      person.schedule.addAllPeriod();
+      setState(() {
+        isLoading = false;
+      });
+    });
   }
 
   /// Save any changes to Firestore and update the local schedule state
@@ -162,6 +165,12 @@ class ADayState extends State<ADayTable> {
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       body: SizedBox.expand(
         child: Padding(

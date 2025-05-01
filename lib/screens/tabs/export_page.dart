@@ -39,7 +39,7 @@ class ExportPageState extends State<ExportPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text("Exclude Free Periods?: "),
+              const Text("Include Free Periods?: "),
               Checkbox(
                 value: person.wantsFreePeriods,
                 onChanged: (val) {

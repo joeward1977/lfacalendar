@@ -66,6 +66,8 @@ class Person {
       ));
     }
 
+    print(wantsFreePeriods);
+
     // Populate yearPeriods with actual data from the CSV
     // Loop through the rows on the csv file
     for (int rows = 0; rows < periodNumbers.length; rows++) {
@@ -83,8 +85,11 @@ class Person {
           if (periodNumbers[rows] ==
               letterDays[letterDayIndex] + period.toString()) {
             int periodIndex = letterDayIndex * 8 + (period - 1);
-            // Make sure we are in the first 54 periods
-            if (periodIndex < yearPeriods.length) {
+            // Make sure we are in the first 54 periods &
+            // Check that we have a class or want free periods
+            if (periodIndex < yearPeriods.length &&
+                (yearPeriods[periodIndex].className != "" ||
+                    wantsFreePeriods)) {
               String periodHeading =
                   letterDays[letterDayIndex] + period.toString();
               if (wantsPeriodHeadings) {
@@ -92,6 +97,9 @@ class Person {
                         .periods[periodIndex].className.isEmpty
                     ? periodHeading
                     : '$periodHeading - ${schedule.periods[periodIndex].className}';
+              } else {
+                yearPeriods[periodIndex].className =
+                    schedule.periods[periodIndex].className;
               }
               yearPeriods[periodIndex].date.add(dates[rows]);
               yearPeriods[periodIndex].startTime.add(startTimes[rows]);
@@ -211,19 +219,17 @@ class Person {
     // Add each period's data to the rows
     for (var period in yearPeriods) {
       for (int i = 0; i < period.date.length; i++) {
-        if (!(wantsFreePeriods && period.className.length <= 2)) {
-          rows.add([
-            period.className,
-            period.date[i],
-            period.startTime[i],
-            period.date[i],
-            period.endTime[i],
-            '',
-            '',
-            period.roomName,
-            ''
-          ]);
-        }
+        rows.add([
+          period.className,
+          period.date[i],
+          period.startTime[i],
+          period.date[i],
+          period.endTime[i],
+          '',
+          '',
+          period.roomName,
+          ''
+        ]);
       }
     }
 
