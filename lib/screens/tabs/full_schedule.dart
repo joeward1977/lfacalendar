@@ -27,39 +27,44 @@ class _FullScheduleTableState extends State<FullScheduleTable> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(15.0),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Full A-G Day Schedule',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
+    // Use Scaffold with AppBar matching A-Day style
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Full A-G Day Schedule',
+          style: Theme.of(context).appBarTheme.titleTextStyle,
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: OutlinedButton.icon(
+              onPressed: save,
+              icon: const Icon(Icons.save),
+              label: const Text('Save'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.black,
+                side: const BorderSide(color: Colors.black),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
                 ),
-                ElevatedButton(
-                  onPressed: save,
-                  child: const Text('Save'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                '(Add any cycle meetings, and non-full cycle classes such as HWC and Ind Studies here)',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontStyle: FontStyle.italic,
-                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                textStyle: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
-            const SizedBox(height: 16),
+          ),
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              '(Add any cycle meetings, and non-full cycle classes such as HWC and Ind Studies here)',
+              style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+            ),
+            const SizedBox(height: 8),
             Expanded(
               child: SingleChildScrollView(
                 scrollDirection: Axis.vertical,

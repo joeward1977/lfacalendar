@@ -16,6 +16,7 @@
         "firebase_core",
         "flutter",
         "flutter_spinkit",
+        "intl",
         "open_file",
         "path_provider",
         "provider",
@@ -104,6 +105,15 @@
         "test_api",
         "vector_math",
         "vm_service"
+      ]
+    },
+    {
+      "name": "intl",
+      "version": "0.19.0",
+      "dependencies": [
+        "clock",
+        "meta",
+        "path"
       ]
     },
     {

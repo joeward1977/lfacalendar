@@ -19,6 +19,17 @@ class ADayState extends State<ADayTable> {
   final List<String> selectedPeriods = [];
   final uuid = const Uuid();
   bool isLoading = true;
+  // Labels for each A-Day band
+  final List<String> bandLabels = [
+    'A1 - Red',
+    'A2 - Royal',
+    'A3 - Yellow',
+    'A4 - Teal',
+    'A5 - Green',
+    'A6 - Orange',
+    'A7 - Pink',
+    'A8 - Purple',
+  ];
 
   @override
   void initState() {
@@ -60,20 +71,28 @@ class ADayState extends State<ADayTable> {
       child: ConstrainedBox(
         constraints:
             BoxConstraints(minWidth: MediaQuery.of(context).size.width),
-        child: DataTable(
-          columns: _createColumns(),
-          rows: _createRows(),
-          dividerThickness: 3,
-          dataRowMinHeight: 35,
-          dataRowMaxHeight: 35,
-          showBottomBorder: true,
-          headingTextStyle: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-          headingRowColor: WidgetStateProperty.resolveWith(
-            (states) => headerColor,
+        child: Card(
+          elevation: 2,
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          child: DataTable(
+            showBottomBorder: true,
+            dividerThickness: 1,
+            dataRowMinHeight: 40,
+            headingRowHeight: 56,
+            headingRowColor: MaterialStateProperty.all(headerColor),
+            headingTextStyle: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+            dataRowColor: MaterialStateProperty.resolveWith<Color?>(
+                (Set<MaterialState> states) {
+              return states.contains(MaterialState.selected)
+                  ? null
+                  : Colors.grey[50];
+            }),
+            columns: _createColumns(),
+            rows: _createRows(),
           ),
         ),
       ),
@@ -82,10 +101,11 @@ class ADayState extends State<ADayTable> {
 
   /// Returns the column headers for the schedule table
   List<DataColumn> _createColumns() {
-    return const [
-      DataColumn(label: Text('Class Name')),
-      DataColumn(label: Text('Room Name')),
-      DataColumn(label: Text('Double?')),
+    return [
+      const DataColumn(label: Text('Band')),
+      const DataColumn(label: Text('Class Name')),
+      const DataColumn(label: Text('Room Name')),
+      const DataColumn(label: Text('Double?')),
     ];
   }
 
@@ -97,14 +117,11 @@ class ADayState extends State<ADayTable> {
     if (person.schedule.periods.length < 54) {
       debugPrint("New User - initializing full period list.");
       person.schedule.addAllPeriod();
-    } else {
-      debugPrint("Returning User - period list found.");
     }
 
     // Only display first 8 periods for this view
     for (int x = 0; x < 8; x++) {
       Period period = person.schedule.periods[x];
-      debugPrint(period.id);
       var name = period.className;
       var room = period.roomName;
       bool full = period.fullCourse;
@@ -114,6 +131,8 @@ class ADayState extends State<ADayTable> {
       }
 
       data.add(DataRow(cells: [
+        // Band label cell
+        DataCell(Text(bandLabels[x])),
         DataCell(Row(children: [
           Expanded(
             child: TextFormField(
@@ -172,42 +191,34 @@ class ADayState extends State<ADayTable> {
     }
 
     return Scaffold(
-      body: SizedBox.expand(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'A-Day Classes',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  ElevatedButton(
-                    onPressed: save,
-                    child: const Text('Save'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              const Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  '(course which meet for the whole cycle)',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontStyle: FontStyle.italic,
-                  ),
+      appBar: AppBar(
+        title: const Text('A-Day Class Schedule'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: OutlinedButton.icon(
+              onPressed: save,
+              icon: const Icon(Icons.save),
+              label: const Text('Save'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.black,
+                side: const BorderSide(color: Colors.black),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
                 ),
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                textStyle: const TextStyle(fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 16),
-              Expanded(child: _createDataTable(context)),
-            ],
+            ),
           ),
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+        child: Column(
+          children: [
+            Expanded(child: _createDataTable(context)),
+          ],
         ),
       ),
     );

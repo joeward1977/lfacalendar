@@ -344,6 +344,12 @@
       "languageVersion": "3.4"
     },
     {
+      "name": "intl",
+      "rootUri": "file:///Users/jward/.pub-cache/hosted/pub.dev/intl-0.19.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
       "name": "io",
       "rootUri": "file:///Users/jward/.pub-cache/hosted/pub.dev/io-1.0.5",
       "packageUri": "lib/",
@@ -722,10 +728,9 @@
       "languageVersion": "3.0"
     }
   ],
-  "generated": "2025-04-14T03:54:49.591724Z",
   "generator": "pub",
-  "generatorVersion": "3.8.0-171.0.dev",
+  "generatorVersion": "3.8.1",
   "flutterRoot": "file:///Users/jward/Developer/flutter",
-  "flutterVersion": "3.31.0-0.1.pre",
+  "flutterVersion": "3.32.8",
   "pubCache": "file:///Users/jward/.pub-cache"
 }

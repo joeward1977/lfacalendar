@@ -47,13 +47,31 @@ class RegisterLoginState extends State<RegisterLogin> {
               elevation: 0.0,
               title: Text(headerText[type]),
               actions: <Widget>[
-                ElevatedButton.icon(
-                    icon: const Icon(Icons.person),
-                    label: Text(toggleText[type]),
-                    style: buttonStyle,
-                    onPressed: () {
-                      setState(() => type = (type + 1) % 2);
-                    }),
+                // Sign In and Register buttons side by side
+                TextButton(
+                  onPressed: () {
+                    if (type != 0) setState(() => type = 0);
+                  },
+                  style: TextButton.styleFrom(
+                    backgroundColor:
+                        type == 0 ? Colors.white : Colors.transparent,
+                    foregroundColor: type == 0 ? headerColor : Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  ),
+                  child: const Text('Sign In'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    if (type != 1) setState(() => type = 1);
+                  },
+                  style: TextButton.styleFrom(
+                    backgroundColor:
+                        type == 1 ? Colors.white : Colors.transparent,
+                    foregroundColor: type == 1 ? headerColor : Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  ),
+                  child: const Text('Register'),
+                ),
               ],
             ),
             body: Container(

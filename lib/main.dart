@@ -27,6 +27,9 @@ class Database extends StatelessWidget {
     return StreamProvider<Person?>.value(
         value: AuthService().user,
         initialData: null,
-        child: const MaterialApp(home: Wrapper()));
+        child: const MaterialApp(
+          title: 'LFA Calendar',
+          home: Wrapper(),
+        ));
   }
 }
