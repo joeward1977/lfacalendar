@@ -30,6 +30,8 @@ class ADayState extends State<ADayTable> {
     'A7 - Pink',
     'A8 - Purple',
   ];
+  // Tracks whether any cell in the corresponding row (A1–A8) has been edited
+  final List<bool> rowEdited = List<bool>.filled(8, false);
 
   @override
   void initState() {
@@ -47,6 +49,12 @@ class ADayState extends State<ADayTable> {
 
   /// Save any changes to Firestore and update the local schedule state
   void save() {
+    for (int i = 0; i < 8; i++) {
+      if (rowEdited[i]) {
+        person.updateBand(i);
+        rowEdited[i] = false; // Reset the edited state after saving
+      }
+    }
     person.updatePeriodsADay();
     person.sendScheduleData();
 
@@ -79,15 +87,15 @@ class ADayState extends State<ADayTable> {
             dividerThickness: 1,
             dataRowMinHeight: 40,
             headingRowHeight: 56,
-            headingRowColor: MaterialStateProperty.all(headerColor),
+            headingRowColor: WidgetStateProperty.all(headerColor),
             headingTextStyle: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
-            dataRowColor: MaterialStateProperty.resolveWith<Color?>(
-                (Set<MaterialState> states) {
-              return states.contains(MaterialState.selected)
+            dataRowColor: WidgetStateProperty.resolveWith<Color?>(
+                (Set<WidgetState> states) {
+              return states.contains(WidgetState.selected)
                   ? null
                   : Colors.grey[50];
             }),
@@ -140,12 +148,13 @@ class ADayState extends State<ADayTable> {
               keyboardType: TextInputType.name,
               onChanged: (val) {
                 debugPrint(period.id);
-                period.className = val;
-                period.fullCourse = true;
+                setState(() {
+                  period.className = val;
+                  period.fullCourse = true;
+                  rowEdited[x] = true; // mark row as changed
+                });
               },
-              onFieldSubmitted: (_) {
-                person.updateDoubles(person.dubs[x], x);
-              },
+              onFieldSubmitted: (_) {},
             ),
           ),
         ])),
@@ -156,12 +165,13 @@ class ADayState extends State<ADayTable> {
               keyboardType: TextInputType.name,
               onChanged: (val) {
                 debugPrint(period.id);
-                period.roomName = val;
-                period.fullCourse = true;
+                setState(() {
+                  period.roomName = val;
+                  period.fullCourse = true;
+                  rowEdited[x] = true; // mark row as changed
+                });
               },
-              onFieldSubmitted: (_) {
-                person.updateDoubles(person.dubs[x], x);
-              },
+              onFieldSubmitted: (_) {},
             ),
           ),
         ])),
@@ -171,7 +181,7 @@ class ADayState extends State<ADayTable> {
             onChanged: (val) {
               setState(() {
                 person.dubs[x] = val ?? false;
-                person.updateDoubles(person.dubs[x], x);
+                rowEdited[x] = true; // mark row as changed
               });
             },
           ),

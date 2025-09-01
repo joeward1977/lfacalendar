@@ -29,6 +29,7 @@ class Person {
   // Calendar Day Preferences
   bool wantsLetterDays = false;
   bool wantsPlanner = false;
+  bool wantsFaithEvents = false;
 
   // Faculty/Staff Preferences
   bool wantsFacultyStaff = false;
@@ -64,18 +65,94 @@ class Person {
 
   // Updates the periods based on the band configuration
   void updatePeriodsADay() {
+    clearEmptyPeriods();
+
     for (int i = 0; i < bands.length; i++) {
+      final bool isFull = schedule.periods[i].fullCourse;
+
+      // Base band slot: only set color if this is a full course; otherwise clear
+      schedule.periods[i].colorId = isFull ? periodColors[i] : null;
+
       for (int j = 0; j < bands[0].length; j++) {
-        schedule.periods[i].colorId = periodColors[i];
-        if (schedule.periods[i].fullCourse) {
-          schedule.periods[bands[i][j]] = schedule.periods[i];
+        final int toIdx = bands[i][j];
+        if (isFull) {
+          // Copy fields to mapped slot and apply color
+          _copyPeriodFields(i, toIdx);
+          schedule.periods[toIdx].colorId = periodColors[i];
+        } else {
+          // Not a full course: ensure mapped slot does not inherit a color
+          schedule.periods[toIdx].colorId = null;
         }
+      }
+    }
+    // Keep double-period colorIds synchronized
+    _ensureDoubleColors();
+  }
+
+  void updateBand(int bandIndex) {
+    if (bandIndex < 0 || bandIndex >= bands.length) return;
+    // Base band slot: only set color if this is a full course; otherwise clear
+    schedule.periods[bandIndex].colorId = periodColors[bandIndex];
+
+    for (int i = 0; i < bands[bandIndex].length; i++) {
+      final int toIdx = bands[bandIndex][i];
+      // Copy fields to mapped slot and apply color
+      _copyPeriodFields(bandIndex, toIdx);
+      schedule.periods[toIdx].colorId = periodColors[i];
+    }
+  }
+
+  void _ensureDoubleColors() {
+    for (int i = 0; i < doubles.length; i++) {
+      final di = doubles[i];
+      if (di >= 0 && dubs[i] && schedule.periods[i].fullCourse) {
+        // Double is enabled and base is full-course: clone and color
+        _copyPeriodFields(i, di);
+        schedule.periods[di].colorId = periodColors[i];
+      } else if (di >= 0) {
+        // Either double unchecked or base not full-course: reset to empty and clear color
+        _copyPeriodFields(55, di);
+        schedule.periods[di].colorId = null;
       }
     }
   }
 
+  void clearEmptyPeriods() {
+    for (var period in schedule.periods) {
+      if (period.className.isEmpty && period.roomName.isEmpty) {
+        period.startDate.clear();
+        period.startTime.clear();
+        period.endDate.clear();
+        period.endTime.clear();
+        period.fullCourse = false;
+        period.colorId = null;
+      }
+    }
+  }
+
+  // Copy all visible fields from one period to another index (avoid sharing references)
+  void _copyPeriodFields(int fromIdx, int toIdx) {
+    final src = schedule.periods[fromIdx];
+    // Preserve the destination slot's id so each slot remains unique
+    final keepId = schedule.periods[toIdx].id;
+    schedule.periods[toIdx] = Period.withData(
+      id: keepId,
+      className: src.className,
+      roomName: src.roomName,
+      fullCourse: src.fullCourse,
+      startDate: List.of(src.startDate),
+      startTime: List.of(src.startTime),
+      endDate: List.of(src.endDate),
+      endTime: List.of(src.endTime),
+      colorId: src.colorId,
+      description: src.description,
+    );
+  }
+
   // Fills the yearPeriods list with data from the CSV files
   void fillYearPeriods() async {
+    // Ensure colors are stamped onto schedule.periods based on fullCourse before snapshotting
+    //updatePeriodsADay();
     yearPeriods.clear();
     List<String> periodNumbers = await readClassColumn(0);
     List<String> dates = await readClassColumn(1);
@@ -96,6 +173,7 @@ class Person {
           startTime: [],
           endDate: [],
           endTime: [],
+          description: schedule.periods[i].description,
         ));
       }
 
@@ -162,6 +240,9 @@ class Person {
       await addExtraEvents('Letter Days', 'assets/days.csv');
     }
     if (wantsPlanner) await addExtraEvents('Planner', 'assets/planner.csv');
+    if (wantsFaithEvents) {
+      await addExtraEvents('Faith Events', 'assets/faith.csv');
+    }
 
     if (wantsFacultyStaff) {
       await addExtraEvents('Faculty/Staff', 'assets/facultystaff.csv');
@@ -182,34 +263,30 @@ class Person {
     List<String> startTimes = await loadColumnFromCSV(file, 2);
     List<String> endDates = await loadColumnFromCSV(file, 3);
     List<String> endTimes = await loadColumnFromCSV(file, 4);
+    List<String> descriptions = await loadColumnFromCSV(file, 6);
+    List<String> locations = await loadColumnFromCSV(file, 7);
     subjects.removeAt(0); // Remove header
     startDates.removeAt(0); // Remove header
     startTimes.removeAt(0); // Remove header
     endDates.removeAt(0); // Remove header
     endTimes.removeAt(0); // Remove header
+    descriptions.removeAt(0); // Remove header
+    locations.removeAt(0); // Remove header
 
     for (int i = 0; i < startDates.length; i++) {
       // Create a new Period object for each event
       yearPeriods.add(Period.withData(
         id: uuid.v4(),
         className: subjects[i],
-        roomName: '',
+        roomName: locations[i],
         fullCourse: false,
         startDate: [startDates[i]],
         startTime: [startTimes[i]],
         endDate: [endDates[i]],
         endTime: [endTimes[i]],
+        description: descriptions[i],
       ));
     }
-  }
-
-  // Updates the schedule for double periods based on user input
-  void updateDoubles(bool wasChecked, int periodNum) {
-    if (periodNum == 5) return; // Skip if the period is 5
-    schedule.periods[periodNum].colorId = periodColors[periodNum];
-    schedule.periods[doubles[periodNum]] =
-        wasChecked ? schedule.periods[periodNum] : schedule.periods[55];
-    updatePeriodsADay(); // Update the periods after modification
   }
 
   // Initializes the schedule with new Period objects
@@ -234,7 +311,6 @@ class Person {
   // Loads the schedule data from Firestore
   Future loadScheduleData() async {
     schedule.addAllPeriod(); // Ensure all periods are added
-    updatePeriodsADay(); // Update periods to reflect any changes
     final docRef = firestoreDB.collection("users").doc(uid).withConverter(
           fromFirestore: Schedule.fromFirestore,
           toFirestore: (Schedule schedule, _) => schedule.toMap(),
@@ -250,9 +326,8 @@ class Person {
       // Persist the new default schedule to Firestore for this user
       await docRef.set(schedule);
     }
-    // Re-apply any derived updates (ensure colorId is populated)
-    updatePeriodsADay();
-    // Now schedule.periods have correct colorId for later export
+    // After loading, ensure color assignments are applied based on fullCourse
+    // updatePeriodsADay();
   }
 
   // Loads a specific column from a CSV file
@@ -284,7 +359,8 @@ class Person {
         'Start Time',
         'End Date',
         'End Time',
-        'Location'
+        'Location',
+        'Description',
       ]);
       for (var period in yearPeriods) {
         for (int i = 0; i < period.startDate.length; i++) {
@@ -294,7 +370,8 @@ class Person {
             period.startTime[i],
             period.endDate[i],
             period.endTime[i],
-            period.roomName
+            period.roomName,
+            period.description,
           ]);
         }
       }
@@ -331,7 +408,8 @@ class Person {
           'Start Time',
           'End Date',
           'End Time',
-          'Location'
+          'Location',
+          'Description'
         ]);
         for (var p in periods) {
           for (int i = 0; i < p.startDate.length; i++) {
@@ -341,7 +419,8 @@ class Person {
               p.startTime[i],
               p.endDate[i],
               p.endTime[i],
-              p.roomName
+              p.roomName,
+              p.description
             ]);
           }
         }
@@ -369,7 +448,8 @@ class Person {
           'Start Time',
           'End Date',
           'End Time',
-          'Location'
+          'Location',
+          'Description'
         ]);
         for (var p in otherEvents) {
           for (int i = 0; i < p.startDate.length; i++) {
@@ -379,7 +459,8 @@ class Person {
               p.startTime[i],
               p.endDate[i],
               p.endTime[i],
-              p.roomName
+              p.roomName,
+              p.description
             ]);
           }
         }

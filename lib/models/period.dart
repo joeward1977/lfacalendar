@@ -11,6 +11,7 @@ class Period {
   List<String> endDate;
   List<String> endTime;
   int? colorId;
+  String description;
 
   Period(var id, {int? colorId})
       : this.withData(
@@ -22,7 +23,8 @@ class Period {
             startTime: [],
             endDate: [],
             endTime: [],
-            colorId: colorId);
+            colorId: colorId,
+            description: "");
 
   Period.withData(
       {required this.id,
@@ -33,7 +35,8 @@ class Period {
       required this.startTime,
       required this.endDate,
       required this.endTime,
-      this.colorId});
+      this.colorId,
+      required this.description});
 
   dynamic getSortValue(int index) {
     switch (index) {
@@ -59,6 +62,7 @@ class Period {
       colorId: theMap['colorId'] != null
           ? int.tryParse(theMap['colorId'].toString())
           : null,
+      description: theMap['description'] ?? "",
     );
   }
 
@@ -68,6 +72,8 @@ class Period {
       "className": className,
       "roomName": roomName,
       "fullCourse": fullCourse,
+      "colorId": colorId,
+      "description": description,
     };
   }
 }

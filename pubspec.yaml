@@ -87,6 +87,7 @@ flutter:
       - assets/meetingperiods.csv
       - assets/mm.csv
       - assets/planner.csv
+      - assets/faith.csv
       
 
   #   - images/a_dot_burr.jpeg

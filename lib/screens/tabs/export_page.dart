@@ -19,11 +19,12 @@ class ExportPageState extends State<ExportPage> {
   void initState() {
     super.initState();
     person = widget.person;
+    setState(() {});
 
     // Load the user's existing schedule data
-    person.loadScheduleData().then((_) {
-      setState(() {});
-    });
+    // person.loadScheduleData().then((_) {
+    //   setState(() {});
+    // });
   }
 
   @override
@@ -160,6 +161,12 @@ class ExportPageState extends State<ExportPage> {
             _buildCheckbox("Include Planner Events", person.wantsPlanner,
                 (val) {
               person.wantsPlanner = !person.wantsPlanner;
+              setState(() {});
+            }),
+            _buildCheckbox(
+                "Include Multifaith Calendar Events", person.wantsFaithEvents,
+                (val) {
+              person.wantsFaithEvents = !person.wantsFaithEvents;
               setState(() {});
             }),
             const Divider(), // Section separator before Include Faculty/Staff Meetings

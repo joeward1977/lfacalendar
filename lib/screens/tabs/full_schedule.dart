@@ -17,7 +17,8 @@ class _FullScheduleTableState extends State<FullScheduleTable> {
   void initState() {
     super.initState();
     person = widget.person;
-    person.loadScheduleData().then((_) => setState(() {}));
+    setState(() {});
+    // person.loadScheduleData().then((_) => setState(() {}));
   }
 
   void save() {
@@ -167,6 +168,8 @@ class _FullScheduleTableState extends State<FullScheduleTable> {
                                       person.schedule.periods[i + j * 8]
                                           .className = val;
                                       person.schedule.periods[i + j * 8]
+                                          .colorId = null;
+                                      person.schedule.periods[i + j * 8]
                                           .fullCourse = false;
                                     },
                                     onFieldSubmitted: (val) => save(),
@@ -187,6 +190,8 @@ class _FullScheduleTableState extends State<FullScheduleTable> {
                                     onChanged: (val) {
                                       person.schedule.periods[i + j * 8]
                                           .roomName = val;
+                                      person.schedule.periods[i + j * 8]
+                                          .colorId = null;
                                       person.schedule.periods[i + j * 8]
                                           .fullCourse = false;
                                     },
